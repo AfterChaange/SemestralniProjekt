@@ -1,0 +1,1 @@
+Základní info k databázi
