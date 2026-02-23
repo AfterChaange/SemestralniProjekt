@@ -1,0 +1,4 @@
+cz\osu\demo\repositories\UserRepository.class
+cz\osu\demo\DemoApplication.class
+cz\osu\demo\entities\User.class
+cz\osu\demo\controllers\TestController.class
