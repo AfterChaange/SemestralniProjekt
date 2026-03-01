@@ -5,7 +5,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "products")
-//test123
+//test1234
 public class Product {
 
     @Id
