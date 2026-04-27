@@ -1,37 +1,91 @@
 package cz.osu.swi_projekt.entities;
 
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "skladove_pohyby")
 public class SkladovyPohyb {
-    private int id;
-    private int polozkaId;
-    private int zmenaMnozstvi;
-    private LocalDateTime datum = LocalDateTime.now();
-    private String typPohybu = "";
+
+    @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "VARCHAR(36)")
+    private String id;
+
+    @ManyToOne
+    @JoinColumn(name = "polozka_id", nullable = false)
+    private SkladovaPolozka polozka;
+
+    @ManyToOne
+    @JoinColumn(name = "zdroj_sklad_id")
+    private Sklad zdrojSklad;
+
+    @ManyToOne
+    @JoinColumn(name = "cil_sklad_id")
+    private Sklad cilSklad;
+
+    private LocalDateTime datum;
+
+    private Integer mnozstvi;
+
+    private String typPohybu;
+
+    @PrePersist
+    public void onCreate() {
+        this.datum = LocalDateTime.now();
+    }
 
     public SkladovyPohyb() {}
 
-    public SkladovyPohyb(int id, int polozkaId, int zmenaMnozstvi, LocalDateTime datum, String typPohybu) {
-        this.id = id;
-        this.polozkaId = polozkaId;
-        this.zmenaMnozstvi = zmenaMnozstvi;
-        this.datum = datum;
+    public String getId() {
+        return id;
+    }
+
+    public LocalDateTime getDatum() {
+        return datum;
+    }
+
+    public SkladovaPolozka getPolozka() {
+        return polozka;
+    }
+
+    public void setPolozka(SkladovaPolozka polozka) {
+        this.polozka = polozka;
+    }
+
+    public Sklad getZdrojSklad() {
+        return zdrojSklad;
+    }
+
+    public void setZdrojSklad(Sklad zdrojSklad) {
+        this.zdrojSklad = zdrojSklad;
+    }
+
+    public Sklad getCilSklad() {
+        return cilSklad;
+    }
+
+    public void setCilSklad(Sklad cilSklad) {
+        this.cilSklad = cilSklad;
+    }
+
+    public Integer getMnozstvi() {
+        return mnozstvi;
+    }
+
+    public void setMnozstvi(Integer mnozstvi) {
+        this.mnozstvi = mnozstvi;
+    }
+
+    public String getTypPohybu() {
+        return typPohybu;
+    }
+
+    public void setTypPohybu(String typPohybu) {
         this.typPohybu = typPohybu;
     }
 
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
-    public int getPolozkaId() { return polozkaId; }
-    public void setPolozkaId(int polozkaId) { this.polozkaId = polozkaId; }
-
-    public int getZmenaMnozstvi() { return zmenaMnozstvi; }
-    public void setZmenaMnozstvi(int zmenaMnozstvi) { this.zmenaMnozstvi = zmenaMnozstvi; }
-
-    public LocalDateTime getDatum() { return datum; }
-    public void setDatum(LocalDateTime datum) { this.datum = datum; }
-
-    public String getTypPohybu() { return typPohybu; }
-    public void setTypPohybu(String typPohybu) { this.typPohybu = typPohybu; }
 }
