@@ -1,0 +1,17 @@
+import type { Warehouse, Item, UserRole } from './types';
+
+export class AppState {
+    public isLoggedIn: boolean = false;
+    public userRole: UserRole = null;
+    public currentUsername: string | null = null;
+    public currentWarehouseId: string | null = null;
+    public currentWarehouseName: string | null = null;
+    public showLowStockOnly: boolean = false;
+    public isRegistering: boolean = false;
+
+    public warehouses: Warehouse[] = [];
+    public items: Item[] = [];
+    public isLoading: boolean = false;
+
+    public credentials: { username: string; password: string } | null = null;
+}
