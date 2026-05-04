@@ -17,6 +17,7 @@ class App {
 
     async init() {
         this.render();
+
         if (!this.state.isLoggedIn) {
             const resultDiv = document.getElementById('test-connection-result');
             if (resultDiv) {
@@ -160,9 +161,30 @@ class App {
     }
 
     setupAppListeners() {
+        const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const target = e.target as HTMLInputElement;
+
+                this.state.searchQuery = target.value;
+
+                this.render();
+
+                const newInput = document.getElementById('searchInput') as HTMLInputElement;
+                if (newInput) {
+                    newInput.focus();
+                    const len = newInput.value.length;
+                    newInput.setSelectionRange(len, len);
+                }
+            });
+        }
+
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             this.state = new AppState();
             this.render();
+
+
         });
 
         document.querySelectorAll('.tab-btn').forEach(btn => {

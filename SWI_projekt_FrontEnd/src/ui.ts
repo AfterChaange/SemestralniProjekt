@@ -114,16 +114,31 @@ export class UI {
                     <br>Načítám data...
                 </div>
             `;
+
         }
 
         let itemsHtml = '';
         let filteredItems = state.items;
-        
+
         if (state.showLowStockOnly) {
-            filteredItems = state.items.filter(item => item.jePodLimit || (item.minLimit !== undefined && item.mnozstvi < item.minLimit));
+            filteredItems = state.items.filter(item =>
+                item.jePodLimit || (item.minLimit !== undefined && item.mnozstvi < item.minLimit)
+            );
         } else if (state.currentWarehouseId) {
-            filteredItems = state.items.filter(item => item.sklad && item.sklad.id === state.currentWarehouseId);
+            filteredItems = state.items.filter(item =>
+                item.sklad && item.sklad.id === state.currentWarehouseId
+            );
         }
+
+        if (state.searchQuery && state.searchQuery.trim() !== '') {
+            const q = state.searchQuery.toLowerCase();
+
+            filteredItems = filteredItems.filter(item =>
+                item.nazev.toLowerCase().includes(q)
+            );
+        }
+
+
         
         if (Array.isArray(filteredItems) && filteredItems.length > 0) {
             itemsHtml = filteredItems.map(item => {
@@ -161,13 +176,42 @@ export class UI {
 
         return `
             <header class="main-header">
-                <div>
-                    <div class="breadcrumb">PŘEHLED / ${state.showLowStockOnly ? 'UPOZORNĚNÍ' : (state.currentWarehouseId ? 'SKLADY' : 'VŠE')}</div>
-                    <h2>${state.showLowStockOnly ? 'Položky pod limitem (Kritické)' : (state.currentWarehouseName || 'Všechny položky')}</h2>
-                    ${state.showLowStockOnly ? '<p style="margin:0; color: var(--danger-color); font-size: 0.9rem; margin-top: 0.5rem;">Seznam položek, u kterých klesly zásoby pod nastavené minimum a je třeba je doobjednat.</p>' : ''}
-                </div>
-            </header>
+            	<div class="search-bar" style="margin: 1rem 0;">
+            		<input
+            			type="text"
+            			id="searchInput"
+            			placeholder="Hledat položku podle názvu"
+            			value="${state.searchQuery || ''}"
+            			style="
+            				width: 105%;
+            				padding: 10px 48px;
+            				border-radius: 40px;
+            				border: 1px solid #ddd;
+            				font-size: 14px;
+            			"
+            		/>
+            	</div>
             
+            	<div>
+            		<div class="breadcrumb">
+            			PŘEHLED / ${state.showLowStockOnly
+                        ? 'UPOZORNĚNÍ'
+                        : (state.currentWarehouseId ? 'SKLADY' : 'VŠE')}
+            		</div>
+            
+            		<h2>
+            			${state.showLowStockOnly
+                        ? 'Položky pod limitem (Kritické)'
+                        : (state.currentWarehouseName || 'Všechny položky')}
+            		</h2>
+            
+            		${state.showLowStockOnly
+                        ? `<p style="margin:0; color: var(--danger-color); font-size: 0.9rem; margin-top: 0.5rem;">
+            					Seznam položek, u kterých klesly zásoby pod nastavené minimum a je třeba je doobjednat.
+            			   </p>`
+                        : ''}
+            	</div>
+            </header>
             ${state.userRole === 'ROLE_ADMIN' && !state.showLowStockOnly ? `
             <div class="actions-panel">
                 <div class="panel-header">

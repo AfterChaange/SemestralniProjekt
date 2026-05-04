@@ -1,6 +1,7 @@
 import type { Warehouse, Item, UserRole } from './types';
 
 export class AppState {
+    searchQuery: string = '';
     public isLoggedIn: boolean = false;
     public userRole: UserRole = null;
     public currentUsername: string | null = null;
