@@ -22,14 +22,17 @@ class App {
             const resultDiv = document.getElementById('test-connection-result');
             if (resultDiv) {
                 const isConnected = await this.api.testConnection();
-                if (isConnected) {
-                    resultDiv.innerHTML = `<span style="color: var(--success-color); font-weight: 500;">✓ Spojení se serverem navázáno (Zabezpečeno)</span>`;
-                } else {
-                    resultDiv.innerHTML = `<span style="color: var(--danger-color); font-weight: 500;">✗ Nelze se spojit se serverem (Běží Spring Boot na 8080?)</span>`;
-                }
+                resultDiv.innerHTML = isConnected
+                    ? `<span style="color: var(--success-color); font-weight: 500;">✓ Spojení se serverem navázáno (Zabezpečeno)</span>`
+                    : `<span style="color: var(--danger-color); font-weight: 500;">✗ Nelze se spojit se serverem</span>`;
             }
+            return;
         }
+
+        await this.refreshAll();
     }
+
+
 
     render() {
         const appContainer = document.querySelector<HTMLDivElement>('#app')!;
@@ -47,7 +50,7 @@ class App {
         if (this.state.userRole !== 'ROLE_ADMIN') return;
         const success = await this.api.vyskladnit(this.state.credentials, polozkaId);
         if (success) {
-            await this.refreshData();
+            await this.refreshAll();
         } else {
             alert('Chyba při vyskladnění (Ověřte svá práva)');
         }
@@ -59,31 +62,38 @@ class App {
         
         const success = await this.api.smazat(this.state.credentials, polozkaId);
         if (success) {
-            await this.refreshData();
+            await this.refreshAll();
         } else {
             alert('Chyba při mazání (Ověřte svá práva)');
         }
     }
 
-    async refreshData() {
+    async refreshAll() {
         this.state.isLoading = true;
-        this.render(); 
-        
+        this.render();
+
         try {
-            this.state.items = await this.api.getItems(this.state.credentials);
-            if (this.state.warehouses.length === 0 && this.state.items.length > 0) {
+            const [items, pohyby] = await Promise.all([
+                this.api.getItems(this.state.credentials).catch(() => []),
+                this.api.getPohyby(this.state.credentials, this.state.currentWarehouseId ?? undefined).catch(() => [])
+            ]);
+
+            this.state.items = items;
+            this.state.pohyby = pohyby;
+
+            console.log("refreshAll - pohyby načteny:", this.state.pohyby.length); // debug
+
+            if (this.state.warehouses.length === 0 && items.length > 0) {
                 const map = new Map();
-                this.state.items.forEach(item => {
-                    if (item.sklad && item.sklad.id) map.set(item.sklad.id, item.sklad);
+                items.forEach((item: any) => {
+                    if (item.sklad?.id) map.set(item.sklad.id, item.sklad);
                 });
                 this.state.warehouses = Array.from(map.values());
             }
-        } catch (error) {
-            console.error("Chyba při načítání položek:", error);
-            this.state.items = [];
         } finally {
             this.state.isLoading = false;
-            this.render(); 
+            this.render();
+            console.log("po renderu - pohyby v state:", this.state.pohyby.length); // debug
         }
     }
 
@@ -134,7 +144,7 @@ class App {
                         this.state.showLowStockOnly = false;
 
                         this.state.warehouses = await this.api.getWarehouses(this.state.credentials);
-                        await this.refreshData(); 
+                        await this.refreshAll();
                     }
                 } else {
                     let errorText = this.state.isRegistering ? 'Nepodařilo se vytvořit účet. Možná již existuje.' : 'Nesprávné jméno nebo heslo.';
@@ -188,7 +198,7 @@ class App {
         });
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 const target = e.currentTarget as HTMLButtonElement;
                 const id = target.getAttribute('data-id');
                 
@@ -201,8 +211,8 @@ class App {
                     this.state.currentWarehouseId = id === 'all' ? null : id;
                     this.state.currentWarehouseName = target.getAttribute('data-name');
                 }
-                
-                this.render(); 
+
+                await this.refreshAll();
             });
         });
 
@@ -229,7 +239,7 @@ class App {
                 try {
                     const success = await this.api.naskladnit(this.state.credentials, nazev, mnozstvi, limit, skladId);
                     if (success) {
-                        await this.refreshData(); 
+                        await this.refreshAll();
                         (form as HTMLFormElement).reset(); 
                         document.getElementById('novyNazev')?.focus();
                     } else {

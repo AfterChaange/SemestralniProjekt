@@ -12,7 +12,7 @@ export class UI {
             <form id="loginForm">
                 <div>
                     <label for="username">Uživatelské jméno</label>
-                    <input type="text" id="username" required autocomplete="username" placeholder="Zadejte jméno...">
+                    <input type="text" id="username" required autocomplete="username" placeholder="Zadejte jméno..."
                 </div>
                 <div>
                     <label for="password">Heslo</label>
@@ -106,6 +106,24 @@ export class UI {
         `;
     }
 
+    static renderPohyby(state: AppState): string {
+        if (!state.pohyby || state.pohyby.length === 0) {
+            return `<tr><td colspan="5" style="text-align:center;">Žádné pohyby</td></tr>`;
+        }
+
+        return [...state.pohyby]
+            .sort((a, b) => new Date(b.datum).getTime() - new Date(a.datum).getTime())
+            .map(p => `
+            <tr>
+                <td>${new Date(p.datum).toLocaleString()}</td>
+                <td>${p.polozka.nazev}</td>
+                <td>${p.typPohybu}</td>
+                <td>${p.mnozstvi}</td>
+                <td>${p.cilSklad?.nazev_skladu || p.zdrojSklad?.nazev_skladu || '-'}</td>
+            </tr>
+        `).join('');
+    }
+
     static renderWarehouseContent(state: AppState): string {
         if (state.isLoading) {
             return `
@@ -116,6 +134,8 @@ export class UI {
             `;
 
         }
+
+
 
         let itemsHtml = '';
         let filteredItems = state.items;
@@ -211,6 +231,7 @@ export class UI {
             			   </p>`
                         : ''}
             	</div>
+            	
             </header>
             ${state.userRole === 'ROLE_ADMIN' && !state.showLowStockOnly ? `
             <div class="actions-panel">
@@ -279,6 +300,27 @@ export class UI {
                     </tbody>
                 </table>
             </div>
+                        
+            <div class="movements-panel">
+            <div>
+
+    <h3>📦 Pohyby ve skladu</h3>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Položka</th>
+                <th>Typ</th>
+                <th>Množství</th>
+                <th>Sklad</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${this.renderPohyby(state)}
+        </tbody>
+    </table>
+</div>
         `;
+
     }
 }

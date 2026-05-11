@@ -1,4 +1,4 @@
-import type { Warehouse, Item, UserRole } from './types';
+import type {Warehouse, Item, UserRole, SkladovyPohyb} from './types';
 
 export class AppState {
     searchQuery: string = '';
@@ -13,6 +13,8 @@ export class AppState {
     public warehouses: Warehouse[] = [];
     public items: Item[] = [];
     public isLoading: boolean = false;
+    pohyby: SkladovyPohyb[] = [];
+
 
     public credentials: { username: string; password: string } | null = null;
 }

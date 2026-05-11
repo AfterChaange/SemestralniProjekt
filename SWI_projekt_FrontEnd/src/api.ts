@@ -59,6 +59,17 @@ export class ApiClient {
         return response.ok;
     }
 
+
+    async getPohyby(credentials: any, skladId?: string) {
+        const headers = this.getAuthHeaders(credentials);
+        const url = skladId ? `/sklad/pohyby/sklad/${skladId}` : `/sklad/pohyby`;
+
+        const res = await fetch(url, { headers });
+        if (!res.ok) return [];
+        return await res.json();
+    }
+
+
     async testConnection(): Promise<boolean> {
         try {
             const response = await fetch('/api/auth/login', {
