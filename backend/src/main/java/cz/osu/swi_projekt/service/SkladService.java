@@ -11,6 +11,7 @@ import cz.osu.swi_projekt.repositories.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -42,16 +43,21 @@ public class SkladService {
         }
 
         Sklad finalSklad = sklad;
+
         SkladovaPolozka polozka = polozkaRepo.findAll()
                 .stream()
-                .filter(p -> p.getNazev().equalsIgnoreCase(nazev) && 
-                            (finalSklad == null || (p.getSklad() != null && p.getSklad().getId().equals(finalSklad.getId()))))
+                .filter(p -> p.getNazev().equalsIgnoreCase(nazev)
+                        && (finalSklad == null || (p.getSklad() != null && p.getSklad().getId().equals(finalSklad.getId()))))
                 .findFirst()
                 .orElse(null);
+
+        boolean isNew = false;
 
         if (polozka != null) {
             polozka.setMnozstvi(polozka.getMnozstvi() + mnozstvi);
         } else {
+            isNew = true;
+
             polozka = new SkladovaPolozka();
             polozka.setNazev(nazev);
             polozka.setMnozstvi(mnozstvi);
@@ -64,8 +70,8 @@ public class SkladService {
         SkladovyPohyb pohyb = new SkladovyPohyb();
         pohyb.setPolozka(polozka);
         pohyb.setMnozstvi(mnozstvi);
-        pohyb.setTypPohybu("NASKLADNENI");
         pohyb.setCilSklad(sklad);
+        pohyb.setTypPohybu(isNew ? "VYTVORENI_A_NASKLADNENI" : "NASKLADNENI");
 
         pohybRepo.save(pohyb);
     }
@@ -85,11 +91,12 @@ public class SkladService {
         pohyb.setMnozstvi(-pocet);
         pohyb.setTypPohybu("VYSKLADNENI");
         pohyb.setZdrojSklad(polozka.getSklad());
-
         pohybRepo.save(pohyb);
     }
 
+    @Transactional
     public void smazatPolozku(String polozkaId) {
+        pohybRepo.deleteByPolozka_Id(polozkaId);
         polozkaRepo.deleteById(polozkaId);
     }
 

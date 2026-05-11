@@ -14,7 +14,7 @@ public class SkladovyPohyb {
     private String id;
 
     @ManyToOne
-    @JoinColumn(name = "polozka_id", nullable = false)
+    @JoinColumn(name = "polozka_id", nullable = true)
     private SkladovaPolozka polozka;
 
     @ManyToOne

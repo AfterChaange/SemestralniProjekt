@@ -1,5 +1,6 @@
 package cz.osu.swi_projekt.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,9 +30,11 @@ public class User implements UserDetails {
 
     public User() {}
 
+    // Getters
     public String getId() { return id; }
     public String getRole() { return role; }
 
+    // Metody z UserDetails interface
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role));
@@ -83,6 +86,7 @@ public class User implements UserDetails {
         return true;
     }
 
+    // Setters
     public void setId(String id) { this.id = id; }
     public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }

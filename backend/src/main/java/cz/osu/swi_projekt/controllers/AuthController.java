@@ -36,12 +36,7 @@ public class AuthController {
         newUser.setUsername(request.getUsername());
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // První registrovaný uživatel bude ADMIN, ostatní budou USER
-        if (userRepository.count() == 0) {
-            newUser.setRole("ROLE_ADMIN");
-        } else {
             newUser.setRole("ROLE_USER");
-        }
 
         userRepository.save(newUser);
         return new ResponseEntity<>("Uživatel úspěšně zaregistrován!", HttpStatus.CREATED);
@@ -52,7 +47,7 @@ public class AuthController {
         Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
 
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // Uživatel nenalezen
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         User user = userOptional.get();

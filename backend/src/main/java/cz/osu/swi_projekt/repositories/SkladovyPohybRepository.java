@@ -8,4 +8,5 @@ import java.util.List;
 public interface SkladovyPohybRepository extends JpaRepository<SkladovyPohyb, String> {
     List<SkladovyPohyb> findByCilSklad_Id(String skladId);
     List<SkladovyPohyb> findByZdrojSklad_Id(String skladId);
+    void deleteByPolozka_Id(String polozkaId);
 }
